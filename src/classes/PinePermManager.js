@@ -11,22 +11,19 @@ const axios = require('axios');
 
 /** @class */
 class PinePermManager {
-  sessionId;
+  cookie;
 
   pineId;
 
   /**
    * Creates a PinePermManager instance
-   * @param {string} sessionId Token from `sessionid` cookie
-   * @param {string} signature Signature cookie
+   * @param {string} cookie User cookie
    * @param {string} pineId Indicator ID (Like: PUB;XXXXXXXXXXXXXXXXXXXXX)
    */
-  constructor(sessionId, signature, pineId) {
-    if (!sessionId) throw new Error('Please provide a SessionID');
-    if (!signature) throw new Error('Please provide a Signature');
+  constructor(cookie, pineId) {
+    if (!cookie) throw new Error('Please provide a Cookie');
     if (!pineId) throw new Error('Please provide a PineID');
-    this.sessionId = sessionId;
-    this.signature = signature;
+    this.cookie = cookie;
     this.pineId = pineId;
   }
 
@@ -50,7 +47,7 @@ class PinePermManager {
           headers: {
             origin: 'https://www.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: `sessionid=${this.sessionId};sessionid_sign=${this.signature};`,
+            cookie: this.cookie,
           },
         },
       );
@@ -84,7 +81,7 @@ class PinePermManager {
           headers: {
             origin: 'https://www.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: `sessionid=${this.sessionId};sessionid_sign=${this.signature};`,
+            cookie: this.cookie,
           },
         },
       );
@@ -118,7 +115,7 @@ class PinePermManager {
           headers: {
             origin: 'https://www.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: `sessionid=${this.sessionId};sessionid_sign=${this.signature};`,
+            cookie: this.cookie,
           },
         },
       );
@@ -143,7 +140,7 @@ class PinePermManager {
           headers: {
             origin: 'https://www.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: `sessionid=${this.sessionId};sessionid_sign=${this.signature};`,
+            cookie: this.cookie,
           },
         },
       );

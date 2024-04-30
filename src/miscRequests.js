@@ -377,6 +377,7 @@ module.exports = {
       following: data.user.following,
       followers: data.user.followers,
       notifications: data.user.notification_count,
+      cookies,
       session,
       signature,
       sessionHash: data.user.session_hash,
@@ -387,18 +388,17 @@ module.exports = {
   },
 
   /**
-   * Get user from 'sessionid' cookie
+   * Get user from cookie
    * @function getUser
-   * @param {string} session User 'sessionid' cookie
-   * @param {string} [signature] User 'sessionid_sign' cookie
+   * @param {string} cookie User cookie
    * @param {string} [location] Auth page location (For france: https://fr.tradingview.com/)
    * @returns {Promise<User>} Token
    */
-  async getUser(session, signature = '', location = 'https://www.tradingview.com/') {
+  async getUser(cookie, location = 'https://www.tradingview.com/') {
     const { data } = await axios.get(location, {
       validateStatus,
       headers: {
-        cookie: `sessionid=${session}${signature ? `;sessionid_sign=${signature};` : ''}`,
+        cookie,
       },
     });
 
@@ -428,17 +428,16 @@ module.exports = {
   },
 
   /**
-   * Get user's private indicators from a 'sessionid' cookie
+   * Get user's private indicators from a cookie
    * @function getPrivateIndicators
-   * @param {string} session User 'sessionid' cookie
-   * @param {string} [signature] User 'sessionid_sign' cookie
+   * @param {string} cookie User cookie
    * @returns {Promise<SearchIndicatorResult[]>} Search results
    */
-  async getPrivateIndicators(session, signature = '') {
+  async getPrivateIndicators(cookie, signature = '') {
     const { data } = await axios.get('https://pine-facade.tradingview.com/pine-facade/list?filter=saved', {
       validateStatus,
       headers: {
-        cookie: `sessionid=${session}${signature ? `;sessionid_sign=${signature};` : ''}`,
+        cookie,
       },
     });
 
@@ -464,22 +463,21 @@ module.exports = {
    * User credentials
    * @typedef {Object} UserCredentials
    * @prop {number} id User ID
-   * @prop {string} session User session ('sessionid' cookie)
-   * @prop {string} [signature] User session signature ('sessionid_sign' cookie)
+   * @prop {string} cookie User cookie
    */
 
   /**
    * Get a chart token from a layout ID and the user credentials if the layout is not public
    * @function getChartToken
    * @param {string} layout The layout ID found in the layout URL (Like: 'XXXXXXXX')
-   * @param {UserCredentials} [credentials] User credentials (id + session + [signature])
+   * @param {UserCredentials} [credentials] User credentials
    * @returns {Promise<string>} Token
    */
   async getChartToken(layout, credentials = {}) {
-    const { id, session, signature } = (
-      credentials.id && credentials.session
+    const { id, cookie } = (
+      credentials.id && credentials.cookie
         ? credentials
-        : { id: -1, session: null, signature: null }
+        : { id: -1, cookie: '' }
     );
 
     const { data } = await axios.get(
@@ -487,9 +485,7 @@ module.exports = {
       {
         validateStatus,
         headers: {
-          cookie: session
-            ? `sessionid=${session}${signature ? `;sessionid_sign=${signature};` : ''}`
-            : '',
+          cookie,
         },
       },
     );
