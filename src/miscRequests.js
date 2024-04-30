@@ -130,7 +130,7 @@ module.exports = {
       {
         validateStatus,
         headers: {
-          origin: 'https://www.tradingview.com',
+          origin: 'https://in.tradingview.com',
         },
       },
     );
@@ -190,7 +190,7 @@ module.exports = {
     }
 
     const { data } = await axios.get(
-      `https://www.tradingview.com/pubscripts-suggest-json/?search=${search.replace(/ /g, '%20')}`,
+      `https://in.tradingview.com/pubscripts-suggest-json/?search=${search.replace(/ /g, '%20')}`,
       { validateStatus },
     );
 
@@ -346,12 +346,12 @@ module.exports = {
    */
   async loginUser(username, password, remember = true, UA = 'TWAPI/3.0') {
     const { data, headers } = await axios.post(
-      'https://www.tradingview.com/accounts/signin/',
+      'https://in.tradingview.com/accounts/signin/',
       `username=${username}&password=${password}${remember ? '&remember=on' : ''}`,
       {
         validateStatus,
         headers: {
-          referer: 'https://www.tradingview.com',
+          referer: 'https://in.tradingview.com',
           'Content-Type': 'application/x-www-form-urlencoded',
           'User-agent': `${UA} (${os.version()}; ${os.platform()}; ${os.arch()})`,
         },
@@ -394,7 +394,7 @@ module.exports = {
    * @param {string} [location] Auth page location (For france: https://fr.tradingview.com/)
    * @returns {Promise<User>} Token
    */
-  async getUser(cookie, location = 'https://www.tradingview.com/') {
+  async getUser(cookie, location = 'https://in.tradingview.com/') {
     const { data } = await axios.get(location, {
       validateStatus,
       headers: {
@@ -481,7 +481,7 @@ module.exports = {
     );
 
     const { data } = await axios.get(
-      `https://www.tradingview.com/chart-token/?image_url=${layout}&user_id=${id}`,
+      `https://in.tradingview.com/chart-token/?image_url=${layout}&user_id=${id}`,
       {
         validateStatus,
         headers: {

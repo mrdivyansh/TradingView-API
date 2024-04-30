@@ -41,11 +41,11 @@ class PinePermManager {
   async getUsers(limit = 10, order = '-created') {
     try {
       const { data } = await axios.post(
-        `https://www.tradingview.com/pine_perm/list_users/?limit=${limit}&order_by=${order}`,
+        `https://in.tradingview.com/pine_perm/list_users/?limit=${limit}&order_by=${order}`,
         `pine_id=${this.pineId.replace(/;/g, '%3B')}`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
             cookie: this.cookie,
           },
@@ -67,7 +67,7 @@ class PinePermManager {
   async addUser(username, expiration = null) {
     try {
       const { data } = await axios.post(
-        'https://www.tradingview.com/pine_perm/add/',
+        'https://in.tradingview.com/pine_perm/add/',
         `pine_id=${
           this.pineId.replace(/;/g, '%3B')
         }&username_recip=${
@@ -79,7 +79,7 @@ class PinePermManager {
         }`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
             cookie: this.cookie,
           },
@@ -101,7 +101,7 @@ class PinePermManager {
   async modifyExpiration(username, expiration = null) {
     try {
       const { data } = await axios.post(
-        'https://www.tradingview.com/pine_perm/modify_user_expiration/',
+        'https://in.tradingview.com/pine_perm/modify_user_expiration/',
         `pine_id=${
           this.pineId.replace(/;/g, '%3B')
         }&username_recip=${
@@ -113,7 +113,7 @@ class PinePermManager {
         }`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
             cookie: this.cookie,
           },
@@ -134,11 +134,11 @@ class PinePermManager {
   async removeUser(username) {
     try {
       const { data } = await axios.post(
-        'https://www.tradingview.com/pine_perm/remove/',
+        'https://in.tradingview.com/pine_perm/remove/',
         `pine_id=${this.pineId.replace(/;/g, '%3B')}&username_recip=${username}`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
             cookie: this.cookie,
           },
