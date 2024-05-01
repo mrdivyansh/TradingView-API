@@ -327,7 +327,7 @@ module.exports = {
    * @prop {Object} notifications User's notifications
    * @prop {number} notifications.user User notifications
    * @prop {number} notifications.following Notification from following accounts
-   * @prop {string} session User session
+   * @prop {string} cookies User cookies
    * @prop {string} sessionHash User session hash
    * @prop {string} signature User session signature
    * @prop {string} privateChannel User private channel
@@ -344,7 +344,7 @@ module.exports = {
    * @param {string} [UA] Custom UserAgent
    * @returns {Promise<User>} Token
    */
-  async loginUser(username, password, remember = true, UA = 'TWAPI/3.0') {
+  async loginUser(username, password, remember = true, UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',) {
     const { data, headers } = await axios.post(
       'https://in.tradingview.com/accounts/signin/',
       `username=${username}&password=${password}${remember ? '&remember=on' : ''}`,
@@ -353,7 +353,7 @@ module.exports = {
         headers: {
           referer: 'https://in.tradingview.com',
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-agent': `${UA} (${os.version()}; ${os.platform()}; ${os.arch()})`,
+          'User-agent': UA,
         },
       },
     );
@@ -415,8 +415,6 @@ module.exports = {
           following: parseFloat(/"notification_count":\{"following":([0-9]*),/.exec(data)?.[1] || 0),
           user: parseFloat(/"notification_count":\{"following":[0-9]*,"user":([0-9]*)/.exec(data)?.[1] || 0),
         },
-        session,
-        signature,
         sessionHash: /"session_hash":"(.*?)"/.exec(data)?.[1],
         privateChannel: /"private_channel":"(.*?)"/.exec(data)?.[1],
         authToken: /"auth_token":"(.*?)"/.exec(data)?.[1],
