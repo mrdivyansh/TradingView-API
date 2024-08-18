@@ -1,8 +1,6 @@
-const os = require('os');
 const axios = require('axios');
 
 const PineIndicator = require('./classes/PineIndicator');
-const { genAuthCookies } = require('./utils');
 
 const validateStatus = (status) => status < 500;
 
@@ -103,7 +101,7 @@ module.exports = {
           type: filter,
         },
         headers: {
-          origin: 'https://www.tradingview.com',
+          origin: 'https://in.tradingview.com',
         },
         validateStatus,
       },
@@ -211,13 +209,8 @@ module.exports = {
     }
 
     const { data } = await axios.get(
-      'https://www.tradingview.com/pubscripts-suggest-json',
-      {
-        params: {
-          search: search.replace(/ /g, '%20'),
-        },
-        validateStatus,
-      },
+      `https://in.tradingview.com/pubscripts-suggest-json/?search=${search.replace(/ /g, '%20')}`,
+      { validateStatus },
     );
 
     function norm(str = '') {
@@ -269,18 +262,18 @@ module.exports = {
    * @function getIndicator
    * @param {string} id Indicator ID (Like: PUB;XXXXXXXXXXXXXXXXXXXXX)
    * @param {'last' | string} [version] Wanted version of the indicator
-   * @param {string} [session] User 'sessionid' cookie
+   * @param {string} [cookie] User cookie
    * @param {string} [signature] User 'sessionid_sign' cookie
    * @returns {Promise<PineIndicator>} Indicator
    */
-  async getIndicator(id, version = 'last', session = '', signature = '') {
+  async getIndicator(id, version = 'last', cookie = '') {
     const indicID = id.replace(/ |%/g, '%25');
 
     const { data } = await axios.get(
       `https://pine-facade.tradingview.com/pine-facade/translate/${indicID}/${version}`,
       {
         headers: {
-          cookie: genAuthCookies(session, signature),
+          cookie,
         },
         validateStatus,
       },
@@ -360,7 +353,7 @@ module.exports = {
    * @prop {Object} notifications User's notifications
    * @prop {number} notifications.user User notifications
    * @prop {number} notifications.following Notification from following accounts
-   * @prop {string} session User session
+   * @prop {string} cookies User cookies
    * @prop {string} sessionHash User session hash
    * @prop {string} signature User session signature
    * @prop {string} privateChannel User private channel
@@ -377,15 +370,15 @@ module.exports = {
    * @param {string} [UA] Custom UserAgent
    * @returns {Promise<User>} Token
    */
-  async loginUser(username, password, remember = true, UA = 'TWAPI/3.0') {
+  async loginUser(username, password, remember = true, UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36') {
     const { data, headers } = await axios.post(
-      'https://www.tradingview.com/accounts/signin/',
+      'https://in.tradingview.com/accounts/signin/',
       `username=${username}&password=${password}${remember ? '&remember=on' : ''}`,
       {
         headers: {
-          referer: 'https://www.tradingview.com',
+          referer: 'https://in.tradingview.com',
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-agent': `${UA} (${os.version()}; ${os.platform()}; ${os.arch()})`,
+          'User-agent': UA,
         },
         validateStatus,
       },
@@ -410,6 +403,7 @@ module.exports = {
       following: data.user.following,
       followers: data.user.followers,
       notifications: data.user.notification_count,
+      cookies,
       session,
       signature,
       sessionHash: data.user.session_hash,
@@ -420,17 +414,16 @@ module.exports = {
   },
 
   /**
-   * Get user from 'sessionid' cookie
+   * Get user from cookie
    * @function getUser
-   * @param {string} session User 'sessionid' cookie
-   * @param {string} [signature] User 'sessionid_sign' cookie
+   * @param {string} cookie User cookie
    * @param {string} [location] Auth page location (For france: https://fr.tradingview.com/)
    * @returns {Promise<User>} Token
    */
-  async getUser(session, signature = '', location = 'https://www.tradingview.com/') {
+  async getUser(cookie, location = 'https://in.tradingview.com/') {
     const { data } = await axios.get(location, {
       headers: {
-        cookie: genAuthCookies(session, signature),
+        cookie,
       },
       validateStatus,
     });
@@ -448,8 +441,6 @@ module.exports = {
           following: parseFloat(/"notification_count":\{"following":([0-9]*),/.exec(data)?.[1] ?? 0),
           user: parseFloat(/"notification_count":\{"following":[0-9]*,"user":([0-9]*)/.exec(data)?.[1] ?? 0),
         },
-        session,
-        signature,
         sessionHash: /"session_hash":"(.*?)"/.exec(data)?.[1],
         privateChannel: /"private_channel":"(.*?)"/.exec(data)?.[1],
         authToken: /"auth_token":"(.*?)"/.exec(data)?.[1],
@@ -461,18 +452,17 @@ module.exports = {
   },
 
   /**
-   * Get user's private indicators from a 'sessionid' cookie
+   * Get user's private indicators from a cookie
    * @function getPrivateIndicators
-   * @param {string} session User 'sessionid' cookie
-   * @param {string} [signature] User 'sessionid_sign' cookie
+   * @param {string} cookie User cookie
    * @returns {Promise<SearchIndicatorResult[]>} Search results
    */
-  async getPrivateIndicators(session, signature = '') {
+  async getPrivateIndicators(cookie, signature = '') {
     const { data } = await axios.get(
       'https://pine-facade.tradingview.com/pine-facade/list',
       {
         headers: {
-          cookie: genAuthCookies(session, signature),
+          cookie,
         },
         params: {
           filter: 'saved',
@@ -497,7 +487,7 @@ module.exports = {
         return module.exports.getIndicator(
           ind.scriptIdPart,
           ind.version,
-          session,
+          cookie,
           signature,
         );
       },
@@ -508,33 +498,28 @@ module.exports = {
    * User credentials
    * @typedef {Object} UserCredentials
    * @prop {number} id User ID
-   * @prop {string} session User session ('sessionid' cookie)
-   * @prop {string} [signature] User session signature ('sessionid_sign' cookie)
+   * @prop {string} cookie User cookie
    */
 
   /**
    * Get a chart token from a layout ID and the user credentials if the layout is not public
    * @function getChartToken
    * @param {string} layout The layout ID found in the layout URL (Like: 'XXXXXXXX')
-   * @param {UserCredentials} [credentials] User credentials (id + session + [signature])
+   * @param {UserCredentials} [credentials] User credentials
    * @returns {Promise<string>} Token
    */
   async getChartToken(layout, credentials = {}) {
-    const { id, session, signature } = (
-      credentials.id && credentials.session
+    const { id, cookie } = (
+      credentials.id && credentials.cookie
         ? credentials
-        : { id: -1, session: null, signature: null }
+        : { id: -1, cookie: '' }
     );
 
     const { data } = await axios.get(
-      'https://www.tradingview.com/chart-token',
+      `https://in.tradingview.com/chart-token/?image_url=${layout}&user_id=${id}`,
       {
         headers: {
-          cookie: genAuthCookies(session, signature),
-        },
-        params: {
-          image_url: layout,
-          user_id: id,
+          cookie,
         },
         validateStatus,
       },

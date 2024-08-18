@@ -12,22 +12,19 @@ const { genAuthCookies } = require('../utils');
 
 /** @class */
 class PinePermManager {
-  sessionId;
+  cookie;
 
   pineId;
 
   /**
    * Creates a PinePermManager instance
-   * @param {string} sessionId Token from `sessionid` cookie
-   * @param {string} signature Signature cookie
+   * @param {string} cookie User cookie
    * @param {string} pineId Indicator ID (Like: PUB;XXXXXXXXXXXXXXXXXXXXX)
    */
-  constructor(sessionId, signature, pineId) {
-    if (!sessionId) throw new Error('Please provide a SessionID');
-    if (!signature) throw new Error('Please provide a Signature');
+  constructor(cookie, pineId) {
+    if (!cookie) throw new Error('Please provide a Cookie');
     if (!pineId) throw new Error('Please provide a PineID');
-    this.sessionId = sessionId;
-    this.signature = signature;
+    this.cookie = cookie;
     this.pineId = pineId;
   }
 
@@ -45,13 +42,13 @@ class PinePermManager {
   async getUsers(limit = 10, order = '-created') {
     try {
       const { data } = await axios.post(
-        `https://www.tradingview.com/pine_perm/list_users/?limit=${limit}&order_by=${order}`,
+        `https://in.tradingview.com/pine_perm/list_users/?limit=${limit}&order_by=${order}`,
         `pine_id=${this.pineId.replace(/;/g, '%3B')}`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: genAuthCookies(this.sessionId, this.signature),
+            cookie: this.cookie,
           },
         },
       );
@@ -71,7 +68,7 @@ class PinePermManager {
   async addUser(username, expiration = null) {
     try {
       const { data } = await axios.post(
-        'https://www.tradingview.com/pine_perm/add/',
+        'https://in.tradingview.com/pine_perm/add/',
         `pine_id=${
           this.pineId.replace(/;/g, '%3B')
         }&username_recip=${
@@ -83,9 +80,9 @@ class PinePermManager {
         }`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: genAuthCookies(this.sessionId, this.signature),
+            cookie: this.cookie,
           },
         },
       );
@@ -105,7 +102,7 @@ class PinePermManager {
   async modifyExpiration(username, expiration = null) {
     try {
       const { data } = await axios.post(
-        'https://www.tradingview.com/pine_perm/modify_user_expiration/',
+        'https://in.tradingview.com/pine_perm/modify_user_expiration/',
         `pine_id=${
           this.pineId.replace(/;/g, '%3B')
         }&username_recip=${
@@ -117,9 +114,9 @@ class PinePermManager {
         }`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: genAuthCookies(this.sessionId, this.signature),
+            cookie: this.cookie,
           },
         },
       );
@@ -138,13 +135,13 @@ class PinePermManager {
   async removeUser(username) {
     try {
       const { data } = await axios.post(
-        'https://www.tradingview.com/pine_perm/remove/',
+        'https://in.tradingview.com/pine_perm/remove/',
         `pine_id=${this.pineId.replace(/;/g, '%3B')}&username_recip=${username}`,
         {
           headers: {
-            origin: 'https://www.tradingview.com',
+            origin: 'https://in.tradingview.com',
             'Content-Type': 'application/x-www-form-urlencoded',
-            cookie: genAuthCookies(this.sessionId, this.signature),
+            cookie: this.cookie,
           },
         },
       );
