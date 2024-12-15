@@ -1,6 +1,6 @@
 {
   "name": "@mrdivyansh/tradingview",
-  "version": "3.4.5",
+  "version": "3.4.6",
   "description": "Tradingview instant stocks API, indicator alerts, trading bot, and more !",
   "main": "main.js",
   "scripts": {
@@ -36,6 +36,6 @@
     "eslint": "^7.25.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
-    "vitest": "^0.31.1"
+    "vitest": "^0.31.4"
   }
 }
